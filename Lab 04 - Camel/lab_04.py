@@ -10,15 +10,12 @@ def main():
     print("Survive your desert trek and out run Tarzan.")
 
 # Starting Variables
-    milestraveled = 0
+    miles_traveled = 0
     thirst = 0
     ostrichfatigue = 0
     canteen = 4
-    oasis = -1
-    nativestraveled = -15
-    native_up = random.randrange(0, 12)
-    full_speed = random.randrange(10, 20)
-    moderate_speed = random.randrange(5, 12)
+    oasis = random.randrange(20)
+    natives_traveled = -15
 
 # Game loop
     done = False
@@ -32,33 +29,92 @@ def main():
         print("Q. Quit.")
         print()
 
-# Players choice
         user_choice = input("What is your choice? ")
 
 # Quit
         if user_choice.upper == "Q":
             done = True
-        print("You have left the game.")
+            print("You have left the game.")
 
 # Drink from canteen
         if user_choice == "A":
-            if (0 <= canteen):
-                canteen -= 1
+            if canteen == 0:
+                print("Dust falls from your canteen. Seems you've run out of luck my friend.")
                 thirst = 0
                 print("You drink from your canteen.")
             else:
-                print("Dust falls from your canteen. Seems you've run out of luck my friend.")
+                print("You drink from your canteen.")
+                canteen -= 1
+                thirst = 0
+                natives_traveled += 10
 
 # Moderate speed
         if user_choice == "B":
-            miles = random.randrange(5, 12)
-            milestraveled += miles
+            moderate = random.randrange(5, 12)
+            miles_traveled += moderate
+            print("You run at a moderate speed and make a good about of distance.")
+
             thirst += 1
             ostrichfatigue += 1
-            nativestraveled += random.randrange(3, 12)
-            oasis =random.randrange()
-            if oasis == -1:
+            natives_traveled += random.randrange(3, 12)
 
+# Full speed
+        if user_choice == "C":
+            fast = random.randrange(15, 20)
+
+            if (fast <= 1):
+                print("You tripped and hit your head! No distance was traveled.")
+
+            else:
+                print("You run full speed and run a great distance!")
+                ostrichfatigue += 2
+                natives_traveled += random.randrange(3, 12)
+                thirst += 1
+
+# Stop for the night
+        if user_choice == "D":
+            print("You have stopped for the night.")
+            ostrichfatigue = 0
+            natives_traveled += random.randrange(3, 12)
+            thirst += 1
+
+# Status check
+        if user_choice == "E":
+            print("You have traveled",str(miles_traveled)+"miles.")
+            print("Your canteen has",str(canteen)+"drinks left.")
+            print("Your ostrich is this tired:",str(ostrichfatigue)+".")
+            print("Tarzan is",str(miles_traveled-natives_traveled)+"miles away from you.")
+
+# Oasis
+        if oasis == 20:
+            print("You have found an oasis! Your canteen is now full and fatigue is at 0!")
+            ostrichfatigue = 0
+            thirst = 0
+            canteen = 4
+
+# Other
+        if thirst == 1:
+            print("You are becoming thirsty.")
+        elif thirst == 2:
+            print("You are really thirst.")
+        elif thirst == 3:
+            print("You are extremely dehydrated!")
+
+        if natives_traveled >= miles_traveled:
+            print("Tarzan has caught you!")
+            done = True
+
+        elif ostrichfatigue == 8:
+            print("Tarzan has caught up to you. You are captured.")
+            done = True
+
+        elif thirst == 4:
+            print("You are defeated by dehydration! Tarzan has caught you.")
+            done = True
+
+        elif miles_traveled >= 200:
+            print("Your luck as seen you through this ordeal! You are now safe.")
+            done = True
 
 
 main()
