@@ -32,13 +32,13 @@ def main():
         user_choice = input("What is your choice? ")
 
 # Quit
-        if user_choice.upper == "Q":
+        if user_choice.upper() == "Q":
             done = True
             print("You have left the game.")
 
 # Drink from canteen
-        if user_choice == "A":
-            if canteen == 0:
+        if user_choice.upper() == "A":
+            if canteen <= 0:
                 print("Dust falls from your canteen. Seems you've run out of luck my friend.")
                 thirst = 0
                 print("You drink from your canteen.")
@@ -46,21 +46,23 @@ def main():
                 print("You drink from your canteen.")
                 canteen -= 1
                 thirst = 0
-                natives_traveled += 10
+                natives_traveled += random.randrange(3, 9)
 
 # Moderate speed
-        if user_choice == "B":
+        if user_choice.upper() == "B":
             moderate = random.randrange(5, 12)
             miles_traveled += moderate
             print("You run at a moderate speed and make a good about of distance.")
+            print("You traveled",str(miles_traveled)+" miles.")
 
             thirst += 1
             ostrichfatigue += 1
-            natives_traveled += random.randrange(3, 12)
+            natives_traveled += random.randrange(3, 9)
 
 # Full speed
-        if user_choice == "C":
-            fast = random.randrange(15, 20)
+        elif user_choice.upper() == "C":
+            fast = random.randrange(18, 22)
+            miles_traveled += fast
 
             if (fast <= 1):
                 print("You tripped and hit your head! No distance was traveled.")
@@ -68,22 +70,22 @@ def main():
             else:
                 print("You run full speed and run a great distance!")
                 ostrichfatigue += 2
-                natives_traveled += random.randrange(3, 12)
+                natives_traveled += random.randrange(3, 9)
                 thirst += 1
 
 # Stop for the night
-        if user_choice == "D":
+        if user_choice.upper() == "D":
             print("You have stopped for the night.")
             ostrichfatigue = 0
-            natives_traveled += random.randrange(3, 12)
+            natives_traveled += random.randrange(3, 9)
             thirst += 1
 
 # Status check
-        if user_choice == "E":
-            print("You have traveled",str(miles_traveled)+"miles.")
-            print("Your canteen has",str(canteen)+"drinks left.")
+        if user_choice.upper() == "E":
+            print("You have traveled",str(miles_traveled)+" miles.")
+            print("Your canteen has",str(canteen)+" drinks left.")
             print("Your ostrich is this tired:",str(ostrichfatigue)+".")
-            print("Tarzan is",str(miles_traveled-natives_traveled)+"miles away from you.")
+            print("Tarzan is",str(miles_traveled-natives_traveled)+" miles away from you.")
 
 # Oasis
         if oasis == 20:
