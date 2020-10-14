@@ -19,7 +19,7 @@ def main():
 
     # Defined Rooms
     # Start, Kitchen - Room 0
-    room = ("You have awoken in a kitchen from sleep walking. You see a door to your east and the south.", None, 1, 2,
+    room = Room("You have awoken in a kitchen from sleep walking. You see a door to your east and the south.", None, 1, 2,
             None)
     room_list.append(room)
 
