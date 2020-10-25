@@ -1,14 +1,13 @@
 # Lab 8
 import arcade
 import random
-import math
 
 SPRITE_SCALING_PLAYER = 0.5
-SPRITE_SCALING_FOOD = 0.35
-SPRITE_SCALING_VILLAIN = 0.25
+SPRITE_SCALING_FOOD = 0.40
+SPRITE_SCALING_VILLAIN = 0.40
 
 FOOD_COUNT = 80
-VILLAIN_COUNT = 25
+VILLAIN_COUNT = 50
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -18,25 +17,38 @@ SCREEN_TITLE = "Lab 8 - Sprites"
 
 class Villain(arcade.Sprite):
 
-    def __init__(self, sprite_scaling):
+    def __init__(self, filename, sprite_scaling):
+        super(). __init__(filename, sprite_scaling)
 
-        super().__init__(sprite_scaling)
-
-        self.circle_angle = 0
-
-        self.circle_radius = 0
-        self.circle_speed = 0.01
-
-        self.circle_center_x = 0
-        self.circle_center_y = 0
+        self.change_x = 0
+        self.change_y = 0
 
     def update(self):
-        self.center_x = self.circle_radius * math.sin(self.circle_angle) \
-                        + self.circle_center_x
-        self.center_y = self.circle_radius * math.cos(self.circle_angle) \
-                        + self.circle_center_y
 
-        self.circle_angle += self.circle_speed
+        self.center_x += self.change_x
+        self.center_y += self.change_y
+
+        if self.left < 0:
+            self.change_x = -2
+
+        if self.right > SCREEN_WIDTH:
+            self.change_x = -2
+
+        if self.bottom < 0:
+            self.change_y = -2
+
+        if self.top > SCREEN_HEIGHT:
+            self.change_y = -2
+
+# 2nd option
+    # def reset_pos(self):
+        # self.center_y = random.randrange(SCREEN_HEIGHT + 20, SCREEN_HEIGHT + 100)
+        # self.center_x = random.randrange(SCREEN_WIDTH)
+
+    # def update(self):
+        # self.center_y += 3
+        # if self.top < -0:
+            # self.reset_pos()
 
 
 class Food(arcade.Sprite):
@@ -98,16 +110,15 @@ class SpritesGame(arcade.Window):
             self.food_sprite_list.append(food)
 
         for i in range(VILLAIN_COUNT):
-
             # Create Villain (kenny.nL)
             villain = Villain("Villain.png", SPRITE_SCALING_VILLAIN)
 
-            villain.circle_center_x = random.randrange(SCREEN_WIDTH)
-            villain.circle_center_y = random.randrange(SCREEN_HEIGHT)
+            villain.center_x = random.randrange(SCREEN_WIDTH)
+            villain.center_y = random.randrange(SCREEN_HEIGHT)
+            villain.change_x = random.randrange(-3, 4)
+            villain.change_y = random.randrange(-3, 4)
 
-            villain.circle_radius = random.randrange(10, 200)
-
-            villain.circle_angle = random.random() * 2 * math.pi
+            self.villain_sprite_list.append(villain)
 
     def on_draw(self):
 
@@ -129,6 +140,7 @@ class SpritesGame(arcade.Window):
     def on_update(self, delta_time):
 
         self.food_sprite_list.update()
+        self.villain_sprite_list.update()
 
         hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.food_sprite_list)
         for food in hit_list:
