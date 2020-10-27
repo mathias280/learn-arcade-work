@@ -10,7 +10,7 @@ SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Sprite Box Game"
 
 VIEWPORT_MARGIN = 40
-Food_AMOUNT = 45
+Food_AMOUNT = 100
 MOVEMENT_SPEED = 6
 
 
@@ -50,12 +50,37 @@ class MyGame(arcade.Window):
                     barrel.center_x = x
                     barrel.center_y = y
 
-                    self.wall_list.append(wall)
+                    self.wall_list.append(barrel)
 
-        for x in range(125, 900, 50):
+        for y in range(0, 1300, 58):
             wall = arcade.Sprite("Metalwall.png", SPRITE_SCALING_WALL)
-            wall.center_x == 200
-            wall.center_y == 125
+
+            wall.center_x = 40
+            wall.center_y = y
+
+            self.wall_list.append(wall)
+
+        for x in range(40, 1700, 58):
+            wall = arcade.Sprite("Metalwall.png", SPRITE_SCALING_WALL)
+
+            wall.center_x = x
+            wall.center_y = -60
+
+            self.wall_list.append(wall)
+
+        for y in range(-60, 1300, 58):
+            wall = arcade.Sprite("Metalwall.png", SPRITE_SCALING_WALL)
+
+            wall.center_x = 1700
+            wall.center_y = y
+
+            self.wall_list.append(wall)
+
+        for x in range(40, 1700, 58):
+            wall = arcade.Sprite("Metalwall.png", SPRITE_SCALING_WALL)
+
+            wall.center_x = x
+            wall.center_y = 1270
 
             self.wall_list.append(wall)
 
@@ -112,22 +137,27 @@ class MyGame(arcade.Window):
 
         self.physics_engine.update()
         changed = False
+
         left_boundary = self.view_left + VIEWPORT_MARGIN
         if self.player_sprite.left < left_boundary:
             self.view_left -= left_boundary - self.player_sprite.left
             changed = True
+
         right_boundary = self.view_left + SCREEN_WIDTH - VIEWPORT_MARGIN
         if self.player_sprite.right > right_boundary:
             self.view_left += self.player_sprite.right - right_boundary
             changed = True
+
         top_boundary = self.view_bottom + SCREEN_HEIGHT - VIEWPORT_MARGIN
         if self.player_sprite.top > top_boundary:
             self.view_bottom += self.player_sprite.top - top_boundary
             changed = True
+
         bottom_boundary = self.view_bottom + VIEWPORT_MARGIN
         if self.player_sprite.bottom < bottom_boundary:
             self.view_bottom -= bottom_boundary - self.player_sprite.bottom
             changed = True
+
         self.view_left = int(self.view_left)
         self.view_bottom = int(self.view_bottom)
         if changed:
@@ -142,7 +172,6 @@ class MyGame(arcade.Window):
         for food in hit_list:
             food.remove_from_sprite_lists()
             self.score += 1
-
 
 
 def main():
