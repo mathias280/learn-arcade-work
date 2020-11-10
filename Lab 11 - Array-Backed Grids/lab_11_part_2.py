@@ -71,6 +71,7 @@ class MyGame(arcade.Window):
     def on_mouse_press(self, x, y, button, modifiers):
         """ Called when the user presses a mouse button. """
 
+
         column = x // (WIDTH + MARGIN)
         row = y // (HEIGHT + MARGIN)
 
@@ -85,7 +86,8 @@ class MyGame(arcade.Window):
 
         self.create_shapes_from_grid()
 
-        start
+        cells = {row}, {column}
+        print(cells)
 
 
 def main():
