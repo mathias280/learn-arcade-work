@@ -20,59 +20,55 @@ DIAMOND_AMOUNT = 6
 
 
 def get_map_1():
-    map_file = open(map2_floor.csv)
+
+    map_file = open("map2_floor.csv")
 
     map_array = []
     for line in map_file:
         line = line.strip()
         map_row = line.split(",")
 
-        for i in range(len(map_row)):
-            map_row[i] = int(map_row[i])
+        for index, item in enumerate(map_row):
+            map_row[index] = int(item)
 
         map_array.append(map_row)
+        map_file.close()
 
     return map_array
 
 
 def get_map_2(map_array):
 
-    map2_file = open(map2_door.csv)
+    map2_file = open("map2_door.csv")
 
     for line in map2_file:
         line = line.strip()
         map2_row = line.split(",")
 
-        for i in range(len(map2_row)):
-            map2_row[i] = int(map2_row[i])
+        for index, item in enumerate(map2_row):
+            map2_row[index] = int(item)
 
         map_array.append(map2_row)
+        map2_file.close()
 
     return map_array
 
-    
+
 def get_map_3(map_array):
 
-    map3_file = open(map2_background.csv)
+    map3_file = open("map2_background.csv")
 
     for line in map3_file:
         line = line.strip()
         map3_row = line.split(",")
 
-        for i in range(len(map3_row)):
-            map3_row[i] = int(map3_row[i])
+        for index, item in enumerate(map3_row):
+            map3_row[index] = int(item)
 
         map_array.append(map3_row)
+        map3_file.close()
 
     return map_array
-
-    # map_file2 = open(pmap_layer1.cvs)
-    # for line in map_file2:
-    # line = line.strip()
-    # map_row = line.split(",")
-    # for index, item in enumerate(map_row):
-    # map_row[index] = int(item)
-    # map_array.append(map_row)
 
 
 class TheGame(arcade.Window):
@@ -80,7 +76,7 @@ class TheGame(arcade.Window):
     def __init__(self):
         super().__init__(SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_TITLE)
 
-        arcade.set_background_color(arcade.color.NAVY_BLUE)
+        arcade.set_background_color(arcade.color.WHITE)
 
         self.player_list = None
         self.wall_list = None
@@ -104,7 +100,9 @@ class TheGame(arcade.Window):
         self.player_sprite.center_x = 90
         self.player_sprite.center_y = 270
         self.player_list.append(self.player_sprite)
-        map_array = []
+
+        map_array = get_map_1("map2_floor.csv" "map2_door.csv", "map2_background.csv")
+
         for row_index in range(len(map_array)):
             for column_index in range(len(map_array[row_index])):
 
@@ -116,6 +114,8 @@ class TheGame(arcade.Window):
                 # 10 = door
                 # 6 = stone
                 # 9 = diamond
+
+                wall = -1
 
                 if item == 6:
                     wall = arcade.Sprite("stone.png", SPRITE_SCALING)
@@ -151,17 +151,17 @@ class TheGame(arcade.Window):
 
 
 def on_key_press(self, key, modifiers):
-    if key == arcade.key.UP:
+    if key == arcade.key.SPACE:
         if self.physics_engine.can_jump():
             self.player_sprite.change_y = JUMP_SPEED
-    elif key == arcade.key.LEFT:
+    elif key == arcade.key.A:
         self.player_sprite.change_x = -MOVEMENT_SPEED
-    elif key == arcade.key.RIGHT:
+    elif key == arcade.key.D:
         self.player_sprite.change_x = MOVEMENT_SPEED
 
 
 def on_key_release(self, key, modifiers):
-    if key == arcade.key.LEFT or key == arcade.key.RIGHT:
+    if key == arcade.key.A or key == arcade.key.D:
         self.player_sprite.change_x = 0
 
 
