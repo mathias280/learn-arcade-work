@@ -16,6 +16,7 @@ MAP_HEIGHT = 10
 MOVEMENT_SPEED = 6
 JUMP_SPEED = 14
 GRAVITY = 0.5
+DIAMOND_AMOUNT = 6
 
 
 def get_map(pmap, pmap_layer1):
@@ -52,18 +53,21 @@ class TheGame(arcade.Window):
         self.player_list = None
         self.wall_list = None
 
+        self.diamond_list = None
+
         self.player_sprite = None
 
         self.physics_engine = None
 
         self.view_left = 0
         self.view_bottom = 0
+        self.score = 0
 
     def setup(self):
         self.player_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
-
-        self.player_sprite = arcade.Sprite("character.png", SPRITE_SCALING)
+        self.diamond_list = arcade.SpriteList()
+        self.player_sprite = arcade.Sprite("Xavier.png", SPRITE_SCALING)
 
         self.player_sprite.center_x = 90
         self.player_sprite.center_y = 270
@@ -74,23 +78,21 @@ class TheGame(arcade.Window):
 
                 item = map_array[row_index][column_index]
 
+# items
                 # -1 = empty
-                # 0 = snow
-                # 1 = snowrock
-                # 3 = stonespike
-                # 4 = door
+                # 11 = stonespike
+                # 10 = door
                 # 6 = stone
+                # 9 = diamond
 
-                if item == 0:
-                    wall = arcade.Sprite("snow.png", SPRITE_SCALING)
-                elif item == 1:
-                    wall = arcade.Sprite("snowrock.png", SPRITE_SCALING)
-                elif item == 3:
-                    wall = arcade.Sprite("stonespike.png", SPRITE_SCALING)
-                elif item == 4:
-                    wall = arcade.Sprite("door.png", SPRITE_SCALING)
-                elif item == 6:
+                if item == 6:
                     wall = arcade.Sprite("stone.png", SPRITE_SCALING)
+                elif item == 11:
+                    wall = arcade.Sprite("stonespike.png", SPRITE_SCALING)
+                elif item == 9:
+                    wall = arcade.Sprite("diamond.png", SPRITE_SCALING)
+                elif item == 10:
+                    wall = arcade.Sprite("door.png", SPRITE_SCALING)
 
                 if item >= 0:
                     wall.left = column_index * SCALED_TILE_SIZE
@@ -110,6 +112,10 @@ class TheGame(arcade.Window):
 
         self.wall_list.draw()
         self.player_list.draw()
+        self.diamond_list.draw()
+
+        output = f"score: {self.score}"
+        arcade.draw_text(output, 10, 20, arcade.color.WHITE, 14)
 
 
 def on_key_press(self, key, modifiers):
@@ -127,7 +133,7 @@ def on_key_release(self, key, modifiers):
         self.player_sprite.change_x = 0
 
 
-def update(self, delta_time):
+def on_update(self, delta_time):
     self.physics_engine.update()
 
     changed = False
@@ -157,6 +163,12 @@ def update(self, delta_time):
                             SCREEN_WIDTH + self.view_left,
                             self.view_bottom,
                             SCREEN_HEIGHT + self.view_bottom)
+
+    self.diamond_list.update()
+    hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.diamond_list)
+    for diamond in hit_list:
+        diamond.remove_from_sprite_lists()
+        self.score += 1
 
 
 def main():
