@@ -19,8 +19,8 @@ GRAVITY = 0.5
 DIAMOND_AMOUNT = 6
 
 
-def get_map(pmap, pmap_layer1):
-    map_file = open(pmap.csv)
+def get_map_1():
+    map_file = open(map2_floor.csv)
 
     map_array = []
     for line in map_file:
@@ -31,6 +31,38 @@ def get_map(pmap, pmap_layer1):
             map_row[i] = int(map_row[i])
 
         map_array.append(map_row)
+
+    return map_array
+
+
+def get_map_2(map_array):
+
+    map2_file = open(map2_door.csv)
+
+    for line in map2_file:
+        line = line.strip()
+        map2_row = line.split(",")
+
+        for i in range(len(map2_row)):
+            map2_row[i] = int(map2_row[i])
+
+        map_array.append(map2_row)
+
+    return map_array
+
+    
+def get_map_3(map_array):
+
+    map3_file = open(map2_background.csv)
+
+    for line in map3_file:
+        line = line.strip()
+        map3_row = line.split(",")
+
+        for i in range(len(map3_row)):
+            map3_row[i] = int(map3_row[i])
+
+        map_array.append(map3_row)
 
     return map_array
 
