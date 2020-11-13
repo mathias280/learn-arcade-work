@@ -39,3 +39,37 @@ def selection_sort(my_list):
 my_list = [15, 57, 14, 33, 72, 79, 26, 56, 42, 40]
 selection_sort(my_list)
 print(my_list)
+
+# Lab 4 code
+# def get_map_2(map_array):
+
+    # map2_file = open("map2_door.csv")
+
+    # for line in map2_file:
+        # line = line.strip()
+        # map2_row = line.split(",")
+
+        # for index, item in enumerate(map2_row):
+           #  map2_row[index] = int(item)
+
+       #  map_array.append(map2_row)
+       #  map2_file.close()
+
+   # return map_array
+
+
+# def get_map_3(map_array):
+
+   # map3_file = open("map2_background.csv")
+
+   # for line in map3_file:
+       # line = line.strip()
+       # map3_row = line.split(",")
+
+       # for index, item in enumerate(map3_row):
+           # map3_row[index] = int(item)
+
+        # map_array.append(map3_row)
+        # map3_file.close()
+
+    # return map_array
