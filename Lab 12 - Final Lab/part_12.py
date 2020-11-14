@@ -162,11 +162,8 @@ class MyGame(arcade.Window):
 
         self.physics_engine.update()
 
-        lives_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.danger_list)
-
         diamond_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
                                                                 self.diamond_list)
-
         for diamond in diamond_hit_list:
             diamond.remove_from_sprite_lists()
             arcade.play_sound(self.collect_diamond_sound)
@@ -185,6 +182,8 @@ class MyGame(arcade.Window):
 
         if arcade.check_for_collision_with_list(self.player_sprite,
                                                 self.danger_list):
+            self.player_lives -= 1
+
             self.player_sprite.change_x = 0
             self.player_sprite.change_y = 0
             self.player_sprite.center_x = PLAYER_START_X
@@ -204,6 +203,11 @@ class MyGame(arcade.Window):
             self.view_left = 0
             self.view_bottom = 0
             changed_viewport = True
+
+        if self.player_lives <= 0:
+            print("No Lives Left")
+            print("Game Over")
+            exit()
 
         # --- Manage Scrolling ---
 
