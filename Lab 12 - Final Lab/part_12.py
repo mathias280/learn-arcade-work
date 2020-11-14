@@ -31,8 +31,8 @@ class MyGame(arcade.Window):
 
         self.diamond_list = None
         self.wall_list = None
-        self.foreground_list = None
-        self.background_list = None
+        # self.foreground_list = None
+        # self.background_list = None
         self.danger_list = None
         self.player_list = None
 
@@ -45,6 +45,8 @@ class MyGame(arcade.Window):
 
         self.score = 0
 
+        self.player_lives = 5
+
         self.end_of_map = 0
 
         self.level = 1
@@ -53,6 +55,11 @@ class MyGame(arcade.Window):
         self.jump_sound = arcade.load_sound("jump3.wav")
         self.game_over = arcade.load_sound("gameover4.wav")
 
+
+    def Life_Counter(self):
+
+        self.player_lives = 0
+
     def setup(self, level):
         self.view_bottom = 0
         self.view_left = 0
@@ -60,8 +67,8 @@ class MyGame(arcade.Window):
         self.score = 0
 
         self.player_list = arcade.SpriteList()
-        self.foreground_list = arcade.SpriteList()
-        self.background_list = arcade.SpriteList()
+        # self.foreground_list = arcade.SpriteList()
+        # self.background_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
         self.diamond_list = arcade.SpriteList()
 
@@ -75,8 +82,8 @@ class MyGame(arcade.Window):
 
         platforms_layer_name = 'Platforms'
         diamonds_layer_name = 'Diamonds'
-        foreground_layer_name = 'Foreground'
-        background_layer_name = 'Background'
+        # foreground_layer_name = 'Foreground'
+        # background_layer_name = 'Background'
         danger_layer_name = "Danger"
 
         map_name = f"map3.tmx"
@@ -85,13 +92,13 @@ class MyGame(arcade.Window):
 
         self.end_of_map = my_map.map_size.width * GRID_PIXEL_SIZE
 
-        self.background_list = arcade.tilemap.process_layer(my_map,
-                                                            background_layer_name,
-                                                            TILE_SCALING)
+        # self.background_list = arcade.tilemap.process_layer(my_map,
+                                                            # background_layer_name,
+                                                            # TILE_SCALING)
 
-        self.foreground_list = arcade.tilemap.process_layer(my_map,
-                                                            foreground_layer_name,
-                                                            TILE_SCALING)
+        # self.foreground_list = arcade.tilemap.process_layer(my_map,
+                                                            # foreground_layer_name,
+                                                            # TILE_SCALING)
 
         self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
                                                       layer_name=platforms_layer_name,
@@ -119,16 +126,19 @@ class MyGame(arcade.Window):
         arcade.start_render()
 
         self.wall_list.draw()
-        self.background_list.draw()
+        # self.background_list.draw()
         self.wall_list.draw()
         self.diamond_list.draw()
         self.danger_list.draw()
         self.player_list.draw()
-        self.foreground_list.draw()
+        # self.foreground_list.draw()
 
         score_text = f"Score: {self.score}"
         arcade.draw_text(score_text, 10 + self.view_left, 10 + self.view_bottom,
                          arcade.csscolor.WHITE, 18)
+
+        lives_text = f"Lives: {self.player_lives}"
+        arcade.draw_text(lives_text, 30 + self.view_left, 30 + self.view_bottom, arcade.csscolor.WHITE, 18)
 
     def on_key_press(self, key, modifiers):
 
@@ -151,6 +161,8 @@ class MyGame(arcade.Window):
     def update(self, delta_time):
 
         self.physics_engine.update()
+
+        lives_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.danger_list)
 
         diamond_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
                                                                 self.diamond_list)
