@@ -23,11 +23,49 @@ PLAYER_START_X = 64
 PLAYER_START_Y = 225
 
 
-class MyGame(arcade.Window):
+class OpeningView(arcade.View):
+
+    def on_show(self):
+        arcade.set_background_color(arcade.csscolor.BLACK)
+
+        arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
+
+        arcade.start_render()
+        arcade.draw_text("Game Start", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
+                         arcade.csscolor.WHITE, font_size=50, anchor_x="center")
+        arcade.draw_text("Click to advance", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 75,
+                         arcade.csscolor.WHITE, font_size=20, anchor_x="center")
+
+    def on_mouse_press(self, _x, _y, button, modifiers):
+        game_view = MyGame()
+        game_view.setup()
+        self.window.show_view(game_view)
+
+
+class GameOverView(arcade.View):
+    def on_draw(self):
+        arcade.set_background_color(arcade.csscolor.BLACK)
+
+        arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
+
+        arcade.start_render()
+        arcade.draw_text("Game Over", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
+                         arcade.csscolor.WHITE, font_size=50, anchor_x="center")
+        arcade.draw_text("No More Lives", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 75,
+                         arcade.csscolor.WHITE, font_size=40, anchor_x="center")
+
+    def on_mouse_press(self, _x, _y, _button, _modifiers):
+        """ If the user presses the mouse button, re-start the game. """
+        game_view = MyGame()
+        game_view.setup()
+        self.window.show_view(game_view)
+
+
+class MyGame(arcade.View):
 
     def __init__(self):
 
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        super().__init__()
 
         self.diamond_list = None
         self.wall_list = None
@@ -55,12 +93,12 @@ class MyGame(arcade.Window):
         self.jump_sound = arcade.load_sound("jump3.wav")
         self.game_over = arcade.load_sound("gameover4.wav")
 
-
-    def Life_Counter(self):
+    def life_counter(self):
 
         self.player_lives = 0
 
-    def setup(self, level):
+# Level
+    def setup(self):
         self.view_bottom = 0
         self.view_left = 0
 
@@ -93,12 +131,12 @@ class MyGame(arcade.Window):
         self.end_of_map = my_map.map_size.width * GRID_PIXEL_SIZE
 
         # self.background_list = arcade.tilemap.process_layer(my_map,
-                                                            # background_layer_name,
-                                                            # TILE_SCALING)
+        # background_layer_name,
+        # TILE_SCALING)
 
         # self.foreground_list = arcade.tilemap.process_layer(my_map,
-                                                            # foreground_layer_name,
-                                                            # TILE_SCALING)
+        # foreground_layer_name,
+        # TILE_SCALING)
 
         self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
                                                       layer_name=platforms_layer_name,
@@ -195,7 +233,6 @@ class MyGame(arcade.Window):
             arcade.play_sound(self.game_over)
 
         if self.player_sprite.center_x >= self.end_of_map:
-
             self.level += 1
 
             self.setup(self.level)
@@ -205,9 +242,8 @@ class MyGame(arcade.Window):
             changed_viewport = True
 
         if self.player_lives <= 0:
-            print("No Lives Left")
-            print("Game Over")
-            exit()
+            view = GameOverView()
+            self.window.show_view(view)
 
         # --- Manage Scrolling ---
 
@@ -242,8 +278,9 @@ class MyGame(arcade.Window):
 
 
 def main():
-    window = MyGame()
-    window.setup(window.level)
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    start_view = OpeningView()
+    window.show_view(start_view)
     arcade.run()
 
 
