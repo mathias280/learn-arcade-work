@@ -1,4 +1,9 @@
+"""
+Platformer Game
+Enjoy!
+"""
 import arcade
+# import os
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
@@ -38,7 +43,7 @@ class OpeningView(arcade.View):
 
     def on_mouse_press(self, _x, _y, button, modifiers):
         game_view = MyGame()
-        game_view.setup()
+        game_view.setup_level1()
         self.window.show_view(game_view)
 
 
@@ -55,9 +60,8 @@ class GameOverView(arcade.View):
                          arcade.csscolor.WHITE, font_size=40, anchor_x="center")
 
     def on_mouse_press(self, _x, _y, _button, _modifiers):
-        """ If the user presses the mouse button, re-start the game. """
         game_view = MyGame()
-        game_view.setup()
+        game_view.setup_level1()
         self.window.show_view(game_view)
 
 
@@ -88,6 +92,7 @@ class MyGame(arcade.View):
         self.end_of_map = 0
 
         self.level = 1
+
         # Sounds
         self.collect_diamond_sound = arcade.load_sound("coin2.wav")
         self.jump_sound = arcade.load_sound("jump3.wav")
@@ -97,8 +102,8 @@ class MyGame(arcade.View):
 
         self.player_lives = 0
 
-# Level
-    def setup(self):
+    def setup_level1(self):
+
         self.view_bottom = 0
         self.view_left = 0
 
@@ -116,9 +121,10 @@ class MyGame(arcade.View):
         self.player_sprite.center_y = PLAYER_START_Y
         self.player_list.append(self.player_sprite)
 
-        # --- Load in a map from the tiled editor ---
+        # --- Load in a map from the tiled ---
 
         platforms_layer_name = 'Platforms'
+        moving_platforms_layer_name = 'Moving Platforms'
         diamonds_layer_name = 'Diamonds'
         # foreground_layer_name = 'Foreground'
         # background_layer_name = 'Background'
@@ -137,6 +143,72 @@ class MyGame(arcade.View):
         # self.foreground_list = arcade.tilemap.process_layer(my_map,
         # foreground_layer_name,
         # TILE_SCALING)
+
+        # moving_platforms_list = arcade.tilemap.process_layer(my_map, moving platforms_layer_name, TILE_SCALING)
+        # for sprite in moving_platforms_list:
+        # self.wall_list.append(sprite)
+
+        self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
+                                                      layer_name=platforms_layer_name,
+                                                      scaling=TILE_SCALING,
+                                                      use_spatial_hash=True)
+
+        self.diamond_list = arcade.tilemap.process_layer(my_map,
+                                                         diamonds_layer_name,
+                                                         TILE_SCALING,
+                                                         use_spatial_hash=True)
+
+        self.danger_list = arcade.tilemap.process_layer(my_map,
+                                                        danger_layer_name,
+                                                        TILE_SCALING,
+                                                        use_spatial_hash=True)
+
+        if my_map.background_color:
+            arcade.set_background_color(my_map.background_color)
+
+        self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite,
+                                                             self.wall_list,
+                                                             GRAVITY)
+
+    def setup_level2(self):
+
+        self.view_bottom = 0
+        self.view_left = 0
+
+        # self.foreground_list = arcade.SpriteList()
+        # self.background_list = arcade.SpriteList()
+        self.wall_list = arcade.SpriteList()
+        self.diamond_list = arcade.SpriteList()
+
+        self.player_sprite.center_x = PLAYER_START_X
+        self.player_sprite.center_y = PLAYER_START_Y
+
+        # --- Load in a map from the tiled ---
+
+        platforms_layer_name = 'Platforms'
+        moving_platforms_layer_name = 'Moving Platforms'
+        diamonds_layer_name = 'Diamonds'
+        # foreground_layer_name = 'Foreground'
+        # background_layer_name = 'Background'
+        danger_layer_name = "Danger"
+
+        map_name = f"map4.tmx"
+
+        my_map = arcade.tilemap.read_tmx(map_name)
+
+        self.end_of_map = my_map.map_size.width * GRID_PIXEL_SIZE
+
+        # self.background_list = arcade.tilemap.process_layer(my_map,
+        # background_layer_name,
+        # TILE_SCALING)
+
+        # self.foreground_list = arcade.tilemap.process_layer(my_map,
+        # foreground_layer_name,
+        # TILE_SCALING)
+
+        # moving_platforms_list = arcade.tilemap.process_layer(my_map, moving platforms_layer_name, TILE_SCALING)
+        # for sprite in moving_platforms_list:
+        # self.wall_list.append(sprite)
 
         self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
                                                       layer_name=platforms_layer_name,
@@ -209,6 +281,17 @@ class MyGame(arcade.View):
 
         changed_viewport = False
 
+        # for wall in self.wall_list:
+
+        # if wall.boundary_right and wall.right > wall.boundary_right and wall.change_x > 0:
+        # wall.change_x *= -1
+        # if wall.boundary_left and wall.left < wall.boundary_left and wall.change_x < 0:
+        # wall.change_x *= -1
+        # if wall.boundary_top and wall.top > wall.boundary_top and wall.change_y > 0:
+        # wall.change_y *= -1
+        # if wall.boundary_bottom and wall.bottom < wall.boundary_bottom and wall.change_y < 0:
+        # wall.change_y *= -1
+
         if self.player_sprite.center_y < -100:
             self.player_sprite.center_x = PLAYER_START_X
             self.player_sprite.center_y = PLAYER_START_Y
@@ -232,10 +315,12 @@ class MyGame(arcade.View):
             changed_viewport = True
             arcade.play_sound(self.game_over)
 
-        if self.player_sprite.center_x >= self.end_of_map:
+        print(self.player_sprite.center_x)
+
+        if self.player_sprite.center_x >= 3870:
             self.level += 1
 
-            self.setup(self.level)
+            self.setup_level2()
 
             self.view_left = 0
             self.view_bottom = 0
