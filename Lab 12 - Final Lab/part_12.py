@@ -3,7 +3,7 @@ Platformer Game
 Enjoy!
 """
 import arcade
-# import os
+import os
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
@@ -65,6 +65,24 @@ class GameOverView(arcade.View):
         self.window.show_view(game_view)
 
 
+class WinnerView(arcade.View):
+    def on_draw(self):
+        arcade.set_background_color(arcade.csscolor.GOLD)
+
+        arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
+
+        arcade.start_render()
+        arcade.draw_text("You Won!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
+                         arcade.csscolor.WHITE, font_size=50, anchor_x="center")
+        arcade.draw_text("You Have Escaped the Dungeon!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 75,
+                         arcade.csscolor.WHITE, font_size=40, anchor_x="center")
+
+    def on_mouse_press(self, _x, _y, _button, _modifiers):
+        game_view = MyGame()
+        game_view.setup_level1()
+        self.window.show_view(game_view)
+
+
 class MyGame(arcade.View):
 
     def __init__(self):
@@ -77,6 +95,7 @@ class MyGame(arcade.View):
         # self.background_list = None
         self.danger_list = None
         self.player_list = None
+        self.moving_platforms_list = None
 
         self.player_sprite = None
 
@@ -124,7 +143,6 @@ class MyGame(arcade.View):
         # --- Load in a map from the tiled ---
 
         platforms_layer_name = 'Platforms'
-        moving_platforms_layer_name = 'Moving Platforms'
         diamonds_layer_name = 'Diamonds'
         # foreground_layer_name = 'Foreground'
         # background_layer_name = 'Background'
@@ -143,10 +161,6 @@ class MyGame(arcade.View):
         # self.foreground_list = arcade.tilemap.process_layer(my_map,
         # foreground_layer_name,
         # TILE_SCALING)
-
-        # moving_platforms_list = arcade.tilemap.process_layer(my_map, moving platforms_layer_name, TILE_SCALING)
-        # for sprite in moving_platforms_list:
-        # self.wall_list.append(sprite)
 
         self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
                                                       layer_name=platforms_layer_name,
@@ -175,10 +189,9 @@ class MyGame(arcade.View):
         self.view_bottom = 0
         self.view_left = 0
 
-        # self.foreground_list = arcade.SpriteList()
-        # self.background_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
         self.diamond_list = arcade.SpriteList()
+        self.moving_platforms_list = arcade.SpriteList()
 
         self.player_sprite.center_x = PLAYER_START_X
         self.player_sprite.center_y = PLAYER_START_Y
@@ -187,10 +200,8 @@ class MyGame(arcade.View):
 
         platforms_layer_name = 'Platforms'
         moving_platforms_layer_name = 'Moving Platforms'
+        danger_layer_name = 'Danger'
         diamonds_layer_name = 'Diamonds'
-        # foreground_layer_name = 'Foreground'
-        # background_layer_name = 'Background'
-        danger_layer_name = "Danger"
 
         map_name = f"map4.tmx"
 
@@ -198,17 +209,11 @@ class MyGame(arcade.View):
 
         self.end_of_map = my_map.map_size.width * GRID_PIXEL_SIZE
 
-        # self.background_list = arcade.tilemap.process_layer(my_map,
-        # background_layer_name,
-        # TILE_SCALING)
+# Moving platforms
 
-        # self.foreground_list = arcade.tilemap.process_layer(my_map,
-        # foreground_layer_name,
-        # TILE_SCALING)
-
-        # moving_platforms_list = arcade.tilemap.process_layer(my_map, moving platforms_layer_name, TILE_SCALING)
-        # for sprite in moving_platforms_list:
-        # self.wall_list.append(sprite)
+        moving_platforms_list = arcade.tilemap.process_layer(my_map, moving_platforms_layer_name, TILE_SCALING)
+        for sprite in moving_platforms_list:
+            self.wall_list.append(sprite)
 
         self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
                                                       layer_name=platforms_layer_name,
@@ -236,12 +241,10 @@ class MyGame(arcade.View):
         arcade.start_render()
 
         self.wall_list.draw()
-        # self.background_list.draw()
-        self.wall_list.draw()
         self.diamond_list.draw()
         self.danger_list.draw()
         self.player_list.draw()
-        # self.foreground_list.draw()
+        self.moving_platforms_list.draw()
 
         score_text = f"Score: {self.score}"
         arcade.draw_text(score_text, 10 + self.view_left, 10 + self.view_bottom,
@@ -281,16 +284,17 @@ class MyGame(arcade.View):
 
         changed_viewport = False
 
-        # for wall in self.wall_list:
+        for wall in self.moving_platforms_list:
+            if wall.boundary_right and wall.right > wall.boundary_right and wall.change_x > 0:
+                wall.change_x *= -1
+            if wall.boundary_left and wall.left < wall.boundary_left and wall.change_x < 0:
+                wall.change_x *= -1
+            if wall.boundary_top and wall.top > wall.boundary_top and wall.change_y > 0:
+                wall.change_y *= -1
+            if wall.boundary_bottom and wall.bottom < wall.boundary_bottom and wall.change_y < 0:
+                wall.change_y *= -1
 
-        # if wall.boundary_right and wall.right > wall.boundary_right and wall.change_x > 0:
-        # wall.change_x *= -1
-        # if wall.boundary_left and wall.left < wall.boundary_left and wall.change_x < 0:
-        # wall.change_x *= -1
-        # if wall.boundary_top and wall.top > wall.boundary_top and wall.change_y > 0:
-        # wall.change_y *= -1
-        # if wall.boundary_bottom and wall.bottom < wall.boundary_bottom and wall.change_y < 0:
-        # wall.change_y *= -1
+        self.moving_platforms_list.update()
 
         if self.player_sprite.center_y < -100:
             self.player_sprite.center_x = PLAYER_START_X
@@ -317,7 +321,7 @@ class MyGame(arcade.View):
 
         print(self.player_sprite.center_x)
 
-        if self.player_sprite.center_x >= 3870:
+        if self.player_sprite.center_x >= 3860:
             self.level += 1
 
             self.setup_level2()
@@ -328,6 +332,10 @@ class MyGame(arcade.View):
 
         if self.player_lives <= 0:
             view = GameOverView()
+            self.window.show_view(view)
+
+        if self.player_sprite.center_x >= 3862:
+            view = WinnerView()
             self.window.show_view(view)
 
         # --- Manage Scrolling ---
