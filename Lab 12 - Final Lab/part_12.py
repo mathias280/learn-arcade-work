@@ -3,11 +3,15 @@ Platformer Game
 Enjoy!
 """
 import arcade
-import os
+import random
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
 SCREEN_TITLE = "Platformer Game"
+
+ENEMY_SCALING = 0.5
+ENEMY_NATIVE_SIZE = 128
+ENEMY_SIZE = int(ENEMY_NATIVE_SIZE * ENEMY_SCALING)
 
 CHARACTER_SCALING = 0.7
 TILE_SCALING = 1.1
@@ -23,6 +27,8 @@ LEFT_VIEWPORT_MARGIN = 200
 RIGHT_VIEWPORT_MARGIN = 200
 BOTTOM_VIEWPORT_MARGIN = 150
 TOP_VIEWPORT_MARGIN = 100
+
+ENEMY_AMOUNT = 5
 
 PLAYER_START_X = 64
 PLAYER_START_Y = 225
@@ -91,11 +97,10 @@ class MyGame(arcade.View):
 
         self.diamond_list = None
         self.wall_list = None
-        # self.foreground_list = None
-        # self.background_list = None
         self.danger_list = None
         self.player_list = None
         self.moving_platforms_list = None
+        self.enemy_list = None
 
         self.player_sprite = None
 
@@ -106,7 +111,7 @@ class MyGame(arcade.View):
 
         self.score = 0
 
-        self.player_lives = 5
+        self.player_lives = 4
 
         self.end_of_map = 0
 
@@ -129,10 +134,9 @@ class MyGame(arcade.View):
         self.score = 0
 
         self.player_list = arcade.SpriteList()
-        # self.foreground_list = arcade.SpriteList()
-        # self.background_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
         self.diamond_list = arcade.SpriteList()
+        self.enemy_list = arcade.SpriteList()
 
         image_source = "Xavier.png"
         self.player_sprite = arcade.Sprite(image_source, CHARACTER_SCALING)
@@ -140,12 +144,38 @@ class MyGame(arcade.View):
         self.player_sprite.center_y = PLAYER_START_Y
         self.player_list.append(self.player_sprite)
 
+        enemy = arcade.Sprite("slimeGreen.png", CHARACTER_SCALING)
+
+        enemy.bottom = ENEMY_SIZE
+        enemy.left = ENEMY_SIZE * 2
+
+        enemy.change_x = 2
+        self.enemy_list.append(enemy)
+
+        for i in range(ENEMY_AMOUNT):
+
+            enemy_placed_successfully = False
+            while not enemy_placed_successfully:
+                enemy.center_x = random.randrange(318, 3850)
+
+                wall_hit_list = arcade.check_for_collision_with_list(enemy, self.wall_list)
+                enemy_hit_list = arcade.check_for_collision_with_list(enemy, self.enemy_list)
+
+                if len(wall_hit_list) == 0 and len(enemy_hit_list) == 0:
+                    enemy_placed_successfully = True
+
+            self.enemy_list.append(enemy)
+
+        enemy.boundary_right = ENEMY_SIZE * 6
+        enemy.boundary_left = ENEMY_SIZE * 7
+
+        enemy.change_x = 2
+        self.enemy_list.append(enemy)
+
         # --- Load in a map from the tiled ---
 
         platforms_layer_name = 'Platforms'
         diamonds_layer_name = 'Diamonds'
-        # foreground_layer_name = 'Foreground'
-        # background_layer_name = 'Background'
         danger_layer_name = "Danger"
 
         map_name = f"map3.tmx"
@@ -153,14 +183,6 @@ class MyGame(arcade.View):
         my_map = arcade.tilemap.read_tmx(map_name)
 
         self.end_of_map = my_map.map_size.width * GRID_PIXEL_SIZE
-
-        # self.background_list = arcade.tilemap.process_layer(my_map,
-        # background_layer_name,
-        # TILE_SCALING)
-
-        # self.foreground_list = arcade.tilemap.process_layer(my_map,
-        # foreground_layer_name,
-        # TILE_SCALING)
 
         self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
                                                       layer_name=platforms_layer_name,
@@ -209,16 +231,14 @@ class MyGame(arcade.View):
 
         self.end_of_map = my_map.map_size.width * GRID_PIXEL_SIZE
 
-# Moving platforms
-
-        moving_platforms_list = arcade.tilemap.process_layer(my_map, moving_platforms_layer_name, TILE_SCALING)
-        for sprite in moving_platforms_list:
-            self.wall_list.append(sprite)
-
         self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
                                                       layer_name=platforms_layer_name,
                                                       scaling=TILE_SCALING,
                                                       use_spatial_hash=True)
+
+        moving_platforms_list = arcade.tilemap.process_layer(my_map, moving_platforms_layer_name, TILE_SCALING)
+        for sprite in moving_platforms_list:
+            self.wall_list.append(sprite)
 
         self.diamond_list = arcade.tilemap.process_layer(my_map,
                                                          diamonds_layer_name,
@@ -238,13 +258,14 @@ class MyGame(arcade.View):
                                                              GRAVITY)
 
     def on_draw(self):
+
         arcade.start_render()
 
         self.wall_list.draw()
         self.diamond_list.draw()
         self.danger_list.draw()
         self.player_list.draw()
-        self.moving_platforms_list.draw()
+        self.enemy_list.draw()
 
         score_text = f"Score: {self.score}"
         arcade.draw_text(score_text, 10 + self.view_left, 10 + self.view_bottom,
@@ -284,7 +305,9 @@ class MyGame(arcade.View):
 
         changed_viewport = False
 
-        for wall in self.moving_platforms_list:
+        self.wall_list.update()
+
+        for wall in self.wall_list:
             if wall.boundary_right and wall.right > wall.boundary_right and wall.change_x > 0:
                 wall.change_x *= -1
             if wall.boundary_left and wall.left < wall.boundary_left and wall.change_x < 0:
@@ -293,8 +316,6 @@ class MyGame(arcade.View):
                 wall.change_y *= -1
             if wall.boundary_bottom and wall.bottom < wall.boundary_bottom and wall.change_y < 0:
                 wall.change_y *= -1
-
-        self.moving_platforms_list.update()
 
         if self.player_sprite.center_y < -100:
             self.player_sprite.center_x = PLAYER_START_X
@@ -319,7 +340,21 @@ class MyGame(arcade.View):
             changed_viewport = True
             arcade.play_sound(self.game_over)
 
-        print(self.player_sprite.center_x)
+        if arcade.check_for_collision_with_list(self.player_sprite, self.enemy_list):
+
+            self.player_lives -= 1
+
+            self.player_sprite.change_x = 0
+            self.player_sprite.change_y = 0
+            self.player_sprite.change_x = PLAYER_START_X
+            self.player_sprite.change_y = PLAYER_START_Y
+
+            self.view_left = 0
+            self.view_bottom = 0
+            changed_viewport = True
+            arcade.play_sound(self.game_over)
+
+        print(self.player_sprite.center_y)
 
         if self.player_sprite.center_x >= 3860:
             self.level += 1
