@@ -1,17 +1,14 @@
 """
 Platformer Game
 Enjoy!
+
+All images from Kenny.nL
 """
 import arcade
-import random
 
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 650
+SCREEN_WIDTH = 1300
+SCREEN_HEIGHT = 800
 SCREEN_TITLE = "Platformer Game"
-
-ENEMY_SCALING = 0.5
-ENEMY_NATIVE_SIZE = 128
-ENEMY_SIZE = int(ENEMY_NATIVE_SIZE * ENEMY_SCALING)
 
 CHARACTER_SCALING = 0.7
 TILE_SCALING = 1.1
@@ -27,8 +24,6 @@ LEFT_VIEWPORT_MARGIN = 200
 RIGHT_VIEWPORT_MARGIN = 200
 BOTTOM_VIEWPORT_MARGIN = 150
 TOP_VIEWPORT_MARGIN = 100
-
-ENEMY_AMOUNT = 5
 
 PLAYER_START_X = 64
 PLAYER_START_Y = 225
@@ -138,45 +133,19 @@ class MyGame(arcade.View):
         self.diamond_list = arcade.SpriteList()
         self.enemy_list = arcade.SpriteList()
 
+# Kenny.nL
         image_source = "Xavier.png"
         self.player_sprite = arcade.Sprite(image_source, CHARACTER_SCALING)
         self.player_sprite.center_x = PLAYER_START_X
         self.player_sprite.center_y = PLAYER_START_Y
         self.player_list.append(self.player_sprite)
 
-        enemy = arcade.Sprite("slimeGreen.png", CHARACTER_SCALING)
-
-        enemy.bottom = ENEMY_SIZE
-        enemy.left = ENEMY_SIZE * 2
-
-        enemy.change_x = 2
-        self.enemy_list.append(enemy)
-
-        for i in range(ENEMY_AMOUNT):
-
-            enemy_placed_successfully = False
-            while not enemy_placed_successfully:
-                enemy.center_x = random.randrange(318, 3850)
-
-                wall_hit_list = arcade.check_for_collision_with_list(enemy, self.wall_list)
-                enemy_hit_list = arcade.check_for_collision_with_list(enemy, self.enemy_list)
-
-                if len(wall_hit_list) == 0 and len(enemy_hit_list) == 0:
-                    enemy_placed_successfully = True
-
-            self.enemy_list.append(enemy)
-
-        enemy.boundary_right = ENEMY_SIZE * 6
-        enemy.boundary_left = ENEMY_SIZE * 7
-
-        enemy.change_x = 2
-        self.enemy_list.append(enemy)
-
         # --- Load in a map from the tiled ---
 
         platforms_layer_name = 'Platforms'
         diamonds_layer_name = 'Diamonds'
         danger_layer_name = "Danger"
+        enemy_layer_name = "Enemies"
 
         map_name = f"map3.tmx"
 
@@ -198,6 +167,11 @@ class MyGame(arcade.View):
                                                         danger_layer_name,
                                                         TILE_SCALING,
                                                         use_spatial_hash=True)
+
+        self.enemy_list = arcade.tilemap.process_layer(my_map,
+                                                       enemy_layer_name,
+                                                       TILE_SCALING,
+                                                       use_spatial_hash=True)
 
         if my_map.background_color:
             arcade.set_background_color(my_map.background_color)
@@ -317,6 +291,18 @@ class MyGame(arcade.View):
             if wall.boundary_bottom and wall.bottom < wall.boundary_bottom and wall.change_y < 0:
                 wall.change_y *= -1
 
+        self.enemy_list.update()
+
+        for enemy in self.enemy_list:
+            if enemy.boundary_right and enemy.right > enemy.boundary_right and enemy.change_x > 0:
+                enemy.change_x *= -1
+            if enemy.boundary_left and enemy.left < enemy.boundary_left and enemy.change_x < 0:
+                enemy.change_x *= -1
+            if enemy.boundary_top and enemy.top > enemy.bondary_top and enemy.change_y > 0:
+                enemy.change_y *= -1
+            if enemy.boundary_bottom and enemy.bottom < enemy.boundary_bottom and enemy.change_y < 0:
+                enemy.change_y *= -1
+
         if self.player_sprite.center_y < -100:
             self.player_sprite.center_x = PLAYER_START_X
             self.player_sprite.center_y = PLAYER_START_Y
@@ -354,7 +340,7 @@ class MyGame(arcade.View):
             changed_viewport = True
             arcade.play_sound(self.game_over)
 
-        print(self.player_sprite.center_y)
+        print(self.player_sprite.center_x)
 
         if self.player_sprite.center_x >= 3860:
             self.level += 1
